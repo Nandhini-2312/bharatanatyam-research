@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bharatanatyam — A Comprehensive Research Document</title>
+<style>
+  :root{
+    --bg:#fbf8f3;
+    --paper:#ffffff;
+    --ink:#1f1a17;
+    --muted:#6b625b;
+    --line:#e7ddcf;
+    --accent:#9a3b2e;        /* terracotta */
+    --accent-soft:#f3e4df;
+    --gold:#b8862f;
+    --fact:#1f6b46;          /* green */
+    --fact-bg:#e8f3ec;
+    --interp:#9a6b1f;        /* amber */
+    --interp-bg:#f8efd9;
+    --contro:#a33232;        /* red */
+    --contro-bg:#f8e4e2;
+    --note:#2c5777;          /* blue */
+    --note-bg:#eaf1f7;
+    --maxw:860px;
+  }
+  *{box-sizing:border-box}
+  /* NOTE: no CSS smooth-scroll — on this very long document it stalls before reaching far targets;
+     navigation is handled instantly in JS instead. */
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,'Times New Roman',serif;
+    font-size:18px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ---------- Layout ---------- */
+  .wrap{display:flex;gap:0;max-width:1240px;margin:0 auto}
+  nav.toc{
+    position:fixed;top:0;left:0;z-index:40;
+    width:300px;height:100vh;overflow-y:auto;
+    padding:28px 22px;border-right:1px solid var(--line);
+    background:#f6efe4;
+    transition:transform .25s ease;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    box-shadow:2px 0 16px rgba(0,0,0,.04);
+  }
+  body.nav-closed nav.toc{transform:translateX(-100%)}
+  /* toggle button — always visible at every width */
+  #navToggle{
+    position:fixed;top:14px;left:14px;z-index:60;
+    width:44px;height:44px;border-radius:11px;border:1px solid var(--line);
+    background:#fff;color:var(--accent);font-size:20px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.12);transition:left .25s ease,background .15s;
+  }
+  #navToggle:hover{background:var(--accent-soft)}
+  body:not(.nav-closed) #navToggle{left:262px}
+  /* backdrop for overlay mode (narrow screens) */
+  #backdrop{
+    position:fixed;inset:0;z-index:35;background:rgba(20,15,12,.35);
+    opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  body.show-backdrop:not(.nav-closed) #backdrop{opacity:1;pointer-events:auto}
+  nav.toc h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+  nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:nav}
+  nav.toc li{counter-increment:nav;margin:2px 0}
+  nav.toc a{
+    display:block;text-decoration:none;color:var(--muted);
+    font-size:14px;line-height:1.4;padding:6px 8px 6px 30px;border-radius:7px;position:relative;
+  }
+  nav.toc a::before{content:counter(nav);position:absolute;left:8px;top:6px;font-size:11px;color:var(--gold);font-weight:700}
+  nav.toc a:hover{background:var(--accent-soft);color:var(--accent)}
+  nav.toc a.active{background:var(--accent);color:#fff}
+  nav.toc a.active::before{color:#f3d9b0}
+  nav.toc .toolbtns{margin-top:20px;display:flex;flex-direction:column;gap:8px}
+  nav.toc button{
+    font:inherit;font-size:13px;cursor:pointer;border:1px solid var(--line);
+    background:#fff;color:var(--ink);padding:8px 10px;border-radius:8px;text-align:left;
+  }
+  nav.toc button:hover{border-color:var(--accent);color:var(--accent)}
+
+  main{flex:1;min-width:0;padding:0 44px 120px;background:var(--bg);margin-left:300px;transition:margin-left .25s ease}
+  body.nav-closed main{margin-left:0}
+  .inner{max-width:var(--maxw);margin:0 auto}
+
+  /* ---------- Cover ---------- */
+  header.cover{
+    text-align:center;padding:72px 20px 46px;margin-bottom:14px;border-bottom:2px solid var(--line);
+  }
+  header.cover .kicker{font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  header.cover h1{font-size:52px;line-height:1.05;margin:14px 0 10px;color:var(--accent);letter-spacing:-.5px}
+  header.cover .sub{font-size:19px;color:var(--muted);font-style:italic;max-width:600px;margin:0 auto}
+  header.cover .meta{font-family:-apple-system,sans-serif;font-size:13px;color:var(--muted);margin-top:22px}
+
+  /* ---------- Sections ---------- */
+  section{padding-top:36px;margin-top:8px;scroll-margin-top:16px}
+  h2.sec{
+    font-size:30px;color:var(--accent);margin:0 0 4px;line-height:1.15;letter-spacing:-.3px;
+    display:flex;align-items:baseline;gap:14px;
+  }
+  h2.sec .num{
+    font-family:-apple-system,sans-serif;font-size:15px;font-weight:800;color:#fff;background:var(--accent);
+    min-width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+    align-self:flex-start;margin-top:4px;
+  }
+  h3{font-size:21px;color:var(--ink);margin:26px 0 6px;font-weight:600}
+  p{margin:10px 0}
+  ul,ol.body{margin:8px 0 8px;padding-left:24px}
+  li{margin:6px 0}
+  strong{color:#15110e}
+  em{color:#3a322d}
+  a.ref{color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--accent)}
+
+  /* ---------- Evidence badges ---------- */
+  .tag{
+    display:inline-block;font-family:-apple-system,sans-serif;font-size:10.5px;font-weight:800;
+    letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:20px;
+    vertical-align:middle;margin-right:6px;position:relative;top:-1px;
+  }
+  .tag.fact{color:var(--fact);background:var(--fact-bg);border:1px solid #bfe0cd}
+  .tag.interp{color:var(--interp);background:var(--interp-bg);border:1px solid #ecd9a6}
+  .tag.contro{color:var(--contro);background:var(--contro-bg);border:1px solid #eebab5}
+
+  .legend{
+    display:flex;gap:10px;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);
+    border-radius:14px;padding:16px 18px;margin:24px 0 6px;font-family:-apple-system,sans-serif;font-size:13.5px;
+  }
+  .legend div{flex:1;min-width:200px}
+  .legend b{display:block;margin-bottom:2px}
+
+  /* callout boxes */
+  .box{border-left:4px solid;border-radius:0 10px 10px 0;padding:12px 18px;margin:16px 0;background:var(--paper)}
+  .box.fact{border-color:var(--fact);background:var(--fact-bg)}
+  .box.interp{border-color:var(--interp);background:var(--interp-bg)}
+  .box.contro{border-color:var(--contro);background:var(--contro-bg)}
+  .box .lbl{font-family:-apple-system,sans-serif;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:4px}
+  .box.fact .lbl{color:var(--fact)} .box.interp .lbl{color:var(--interp)} .box.contro .lbl{color:var(--contro)}
+
+  /* tables */
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:15.5px;background:var(--paper);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--accent-soft);color:var(--accent);font-family:-apple-system,sans-serif;font-size:13px;letter-spacing:.03em}
+  tr:last-child td{border-bottom:none}
+  td:first-child{white-space:nowrap;font-family:-apple-system,sans-serif;font-size:13.5px;color:var(--muted)}
+
+  /* ---------- Editable notes ---------- */
+  .notes{
+    margin:22px 0 6px;border:1.5px dashed #c9b9e0;background:#f6f2fb;border-radius:14px;padding:14px 16px;
+  }
+  .notes .nh{
+    font-family:-apple-system,sans-serif;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    color:#6a4aa0;display:flex;align-items:center;gap:8px;margin-bottom:8px;
+  }
+  .notes .nh .saved{font-weight:600;letter-spacing:0;text-transform:none;color:#8a7fa0;font-size:11px;margin-left:auto;opacity:0;transition:opacity .3s}
+  .notes .area{
+    min-height:54px;background:#fff;border:1px solid #e2d6f2;border-radius:9px;padding:10px 12px;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.6;color:var(--ink);
+    outline:none;
+  }
+  .notes .area:focus{border-color:#9a7fd0;box-shadow:0 0 0 3px rgba(154,127,208,.15)}
+  .notes .area:empty::before{content:attr(data-ph);color:#a99cc0}
+
+  footer.end{margin-top:60px;padding-top:24px;border-top:2px solid var(--line);font-size:14px;color:var(--muted);font-family:-apple-system,sans-serif}
+
+  /* progress bar */
+  #progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50;transition:width .1s}
+
+  @media (max-width:880px){
+    main{margin-left:0!important;padding:0 18px 80px}
+    body:not(.nav-closed) #navToggle{left:262px}
+    header.cover h1{font-size:36px}
+    header.cover{padding-top:64px}
+    body{font-size:17px}
+  }
+  /* print */
+  @media print{
+    nav.toc,#progress,#navToggle,#backdrop,.toolbtns,nav.toc button{display:none!important}
+    body{background:#fff;font-size:11.5pt}
+    main{padding:0;margin-left:0!important}
+    .notes{break-inside:avoid;border-color:#bbb;background:#f7f7f7}
+    section{break-inside:auto}
+    h2.sec{break-after:avoid}
+    .box,table{break-inside:avoid}
+    a{color:#000}
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<button id="navToggle" aria-label="Toggle contents" title="Show / hide contents">☰</button>
+<div id="backdrop"></div>
+<div class="wrap">
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol id="tocList">
+    <li><a href="#s1">Introduction</a></li>
+    <li><a href="#s2">Origins &amp; Early History</a></li>
+    <li><a href="#s3">The Devadasi Tradition</a></li>
+    <li><a href="#s4">Transformation under Colonial Rule</a></li>
+    <li><a href="#s5">20th-Century Revival</a></li>
+    <li><a href="#s6">The Role of Brahmins</a></li>
+    <li><a href="#s7">Bharatanatyam &amp; Caste</a></li>
+    <li><a href="#s8">Bharatanatyam &amp; Religion</a></li>
+    <li><a href="#s9">Bharatanatyam as Culture</a></li>
+    <li><a href="#s10">Evolution of the Form</a></li>
+    <li><a href="#s11">Debates &amp; Controversies</a></li>
+    <li><a href="#s12">Conclusion</a></li>
+    <li><a href="#appendix">Appendices &amp; Sources</a></li>
+  </ol>
+  <div class="toolbtns">
+    <button onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <button onclick="exportNotes()">⬇️ Export my notes (.txt)</button>
+    <button onclick="clearNotes()">🗑️ Clear my notes</button>
+  </div>
+</nav>
+
+<!-- ============ MAIN ============ -->
+<main>
+<div class="inner">
+
+<header class="cover">
+  <div class="kicker">Evidence-Based Research Document</div>
+  <h1>Bharatanatyam</h1>
+  <div class="sub">A neutral, balanced survey of history, scholarship, and the ongoing debates surrounding South India's classical dance</div>
+  <div class="meta">Prepared for research, debate preparation &amp; academic discussion &nbsp;·&nbsp; Tip: every section has a purple <b>“My points”</b> box — type in it and your notes save automatically in this browser.</div>
+</header>
+
+<div class="legend">
+  <div><span class="tag fact">Fact</span><b></b>Well supported by texts, inscriptions, or documented record.</div>
+  <div><span class="tag interp">Interpretation</span><b></b>A reasonable scholarly reading that remains contested.</div>
+  <div><span class="tag contro">Controversy</span><b></b>An active dispute where credible scholars/communities disagree.</div>
+</div>
+
+<!-- ===== 1 ===== -->
+<section id="s1">
+  <h2 class="sec"><span class="num">1</span>Introduction to Bharatanatyam</h2>
+
+  <h3>Definition</h3>
+  <p>Bharatanatyam is a solo classical dance form from southern India, historically centred in the Tamil-speaking region (present-day Tamil Nadu). It integrates three elements named in Sanskrit/Tamil poetics: <em>nritta</em> (pure rhythmic dance), <em>nritya</em> (expressive, interpretive dance), and <em>natya</em> (dramatic enactment). Its expressive language rests on <em>abhinaya</em> — the art of communicating emotion — especially <em>hasta mudras</em> (codified hand gestures), facial expression, and <em>bhava–rasa</em> aesthetics (the evocation of emotional “flavour”).</p>
+
+  <h3>The name</h3>
+  <p><span class="tag fact">Fact</span>The term <em>Bharatanatyam</em> came into wide use only in the <strong>20th century</strong>. Earlier, the temple-and-court repertoire was called <strong>sadir</strong> (or <em>sadir kacheri</em>), <strong>dasiattam</strong> (“dance of the dasis”), or <strong>chinna melam</strong>. Whether “Bharata” honours the sage <strong>Bharata Muni</strong> (author of the <em>Natyashastra</em>) or is a folk acronym for <em>bha</em>(va)–<em>ra</em>(ga)–<em>ta</em>(la) is debated; scholars generally treat the acronym as a later popular gloss, not an etymology.</p>
+
+  <h3>Significance &amp; why it is “classical”</h3>
+  <p><span class="tag fact">Fact</span>India's Sangeet Natak Akademi recognizes Bharatanatyam as one of the country's principal classical dances (with Kathak, Kathakali, Kuchipudi, Odissi, Manipuri, Mohiniyattam, and Sattriya). The “classical” label rests on a codified grammar traceable to Sanskrit treatises and Tamil performance lineages; a structured concert sequence (the <em>margam</em>); a continuous teachable pedagogy (the <em>guru–shishya</em> and <em>nattuvanar</em> traditions); and a developed theory of aesthetics.</p>
+  <div class="box interp"><span class="lbl">Interpretation</span>Critics note that “classical” status was itself partly a 20th-century construction shaped by nationalist cultural politics as much as by intrinsic antiquity (Allen; Meduri).</div>
+
+  <h3>Place in Tamil &amp; Indian culture</h3>
+  <p><span class="tag fact">Fact</span>The dance is embedded in Tamil temple, court, and literary culture, and its core lyrical repertoire is largely in Tamil, Telugu, Sanskrit, and Kannada. <span class="tag interp">Interpretation</span>It is simultaneously claimed as a <em>Tamil</em> regional heritage and a pan-<em>Indian</em> national emblem — a dual identity that recurs throughout the debates below.</p>
+
+  <div class="notes"><div class="nh">✎ My points — §1 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s1" data-ph="Add your own notes, questions, or debate points here…"></div></div>
+</section>
+
+<!-- ===== 2 ===== -->
+<section id="s2">
+  <h2 class="sec"><span class="num">2</span>Origins &amp; Early History</h2>
+
+  <h3>Deep antiquity in the Tamil region</h3>
+  <p><span class="tag fact">Fact</span>Dance and music are attested in Tamil culture from the <strong>Sangam era</strong> (roughly 300 BCE–300 CE). The later Tamil epic <em>Cilappatikaram</em> (<em>Silappadikaram</em>, c. 5th–6th century CE by traditional dating) describes a dancer, <strong>Madhavi</strong>, and references a structured performance culture. <span class="tag interp">Interpretation</span>How directly that ancient practice connects to the modern <em>margam</em> is uncertain; continuity is asserted by tradition but cannot be demonstrated step-by-step from the record.</p>
+
+  <h3>The Natyashastra</h3>
+  <p><span class="tag fact">Fact</span>The <em>Natyashastra</em>, attributed to <strong>Bharata Muni</strong> and generally dated c. 200 BCE–200 CE, is the foundational Sanskrit treatise on drama, dance, and music for the whole subcontinent, codifying <em>rasa</em> theory, <em>bhava</em>, <em>karanas</em> (movement units), and <em>angika abhinaya</em>.</p>
+  <div class="box interp"><span class="lbl">Interpretation</span>The <em>Natyashastra</em> is a <strong>pan-Indian</strong> text, not specifically a Tamil or Bharatanatyam manual; later teachers mapped its categories onto South Indian practice. In daily pedagogy the medieval <em>Abhinaya Darpana</em> of <strong>Nandikeshvara</strong> is more directly used for hand-gesture vocabulary.</div>
+
+  <h3>Temple traditions &amp; inscriptions</h3>
+  <p><span class="tag fact">Fact</span>Inscriptions document women dedicated to temple service from at least the medieval period. Under the <strong>Chola dynasty</strong> (9th–13th c.) — notably at the <strong>Brihadisvara (Rajarajeshvara) temple, Thanjavur</strong>, consecrated c. 1010 CE by Rajaraja I — records describe the appointment of many temple women (<em>devaradiyar</em>) with assigned roles and shares of temple resources. <span class="tag interp">Interpretation</span>How closely their dance resembled later sadir is inferred, not documented choreographically.</p>
+
+  <h3>Codification of the modern repertoire</h3>
+  <div class="box fact"><span class="lbl">Fact — a secure anchor</span>The structured solo sequence performed today (the <em>margam</em>) was substantially shaped in the <strong>early 19th century</strong> at the <strong>Thanjavur (Tanjore) court</strong> by the <strong>Tanjore Quartet</strong> — brothers <strong>Chinnayya, Ponnayya, Sivanandam, and Vadivelu</strong> — under Maratha king <strong>Serfoji II</strong> (and later Mysore). They arranged the classic order: <em>alarippu → jatiswaram → shabdam → varnam → padams/javalis → tillana → mangalam</em>. This anchor is comparatively recent — about 200 years old.</div>
+
+  <p><strong>The form as a layered tradition:</strong> ancient pan-Indian theory (<em>Natyashastra</em>) + Tamil performance &amp; literary culture + medieval temple institutions + 19th-century court codification + 20th-century revival and stage reform.</p>
+
+  <div class="notes"><div class="nh">✎ My points — §2 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s2" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== 3 ===== -->
+<section id="s3">
+  <h2 class="sec"><span class="num">3</span>The Devadasi Tradition</h2>
+
+  <h3>Who they were</h3>
+  <p><span class="tag fact">Fact</span><em>Devadasi</em> (“female servant of the deity”; Tamil <em>devaradiyar</em>, <em>tevaratiyar</em>) refers to women ritually dedicated to a temple deity. The institution had regional variants (e.g., <em>maharis</em> in Odisha, <em>joginis</em> elsewhere). In the Tamil region these women, with the male <strong>nattuvanars</strong> (dance masters/conductors), were the principal hereditary practitioners of sadir/Bharatanatyam.</p>
+
+  <h3>Roles in temple &amp; society</h3>
+  <p><span class="tag fact">Fact</span>Documented roles: performing ritual dance and music in temple ceremonies and processions; tending temple lamps and services; and participating in court and elite patronage. Many held a distinctive status — they could own and inherit property (unusual for women of the era), were trained and literate in music and dance, and were regarded as <em>nitya sumangali</em> (“ever-auspicious”). The dance lineage passed through their families and associated nattuvanars.</p>
+
+  <h3>Contribution to preservation</h3>
+  <div class="box interp"><span class="lbl">Interpretation — widely accepted</span>Devadasi families and nattuvanars were the <strong>custodians of the living repertoire, technique, and music</strong> through the 18th–19th centuries. Without them there would have been no codified art for the 20th century to inherit (Srinivasan; Soneji; Kersenboom).</div>
+
+  <h3>The central historical debate</h3>
+  <div class="box contro"><span class="lbl">Controversy</span>Interpretations of devadasi status diverge sharply:
+    <ul>
+      <li><strong>Exploitation view</strong> (colonial reformers &amp; some social reformers): the system entailed concubinage, hereditary obligation, and sexual availability to patrons — effectively institutionalized exploitation.</li>
+      <li><strong>Revisionist view</strong> (Amrit Srinivasan 1985; Kersenboom; Soneji): the colonial framing flattened a complex institution; devadasis had unusual autonomy, economic independence, artistic prestige, and ritual authority — and reform <em>dispossessed</em> them of their hereditary profession.</li>
+      <li><strong>Balanced reading</strong>: both can be partly true — genuine prestige and rare female autonomy <em>and</em>, by the 19th–20th centuries, economic precarity, hereditary compulsion, and sexual exploitation in many cases, varying by region, temple, period, and family.</li>
+    </ul>
+  </div>
+  <p><span class="tag fact">Fact</span>Not in dispute: the institution was hereditary, gendered, and tied to temple economies, and it was the matrix from which modern Bharatanatyam emerged.</p>
+
+  <div class="notes"><div class="nh">✎ My points — §3 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s3" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== 4 ===== -->
+<section id="s4">
+  <h2 class="sec"><span class="num">4</span>Transformation During Colonial Rule</h2>
+
+  <p><span class="tag fact">Fact</span><strong>British attitudes.</strong> Colonial and missionary discourse generally viewed temple dance through a Victorian moral lens, labelling performers “nautch girls” and associating the practice with prostitution — a framing both moralistic and useful to colonial critiques of Hindu society.</p>
+
+  <p><span class="tag fact">Fact</span><strong>The Anti-Nautch movement.</strong> From the <strong>1890s</strong>, a coalition of British officials, Christian missionaries, and Indian social reformers campaigned against dedicating girls to temples and against dance at social functions, circulating pledges asking elites not to invite “nautch” performances.</p>
+
+  <p><span class="tag fact">Fact</span><strong>Indian reformers &amp; legislation.</strong> The campaign was carried by Indian reformers, above all <strong>Dr. Muthulakshmi Reddy</strong> — born into a devadasi-associated family, a pioneering physician and legislator — who pressed abolition through the Madras Legislative Council. This culminated in the <strong>Madras Devadasis (Prevention of Dedication) Act, 1947</strong> (preceded by measures in the 1920s–30s), abolishing temple dedication in the Madras Presidency.</p>
+
+  <div class="box contro"><span class="lbl">Controversy — double-edged effect</span>Reform ended a system many considered exploitative — yet it simultaneously <strong>delegitimized the hereditary profession</strong>, often pushing devadasis and nattuvanars into poverty and stigma, even as the art they preserved was, in the same decades, “rescued” and re-presented by others. Whether this was liberation, dispossession, or both is among the field's most contested questions (Soneji, <em>Unfinished Gestures</em>, 2012; Srinivasan).</div>
+
+  <div class="notes"><div class="nh">✎ My points — §4 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s4" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== 5 ===== -->
+<section id="s5">
+  <h2 class="sec"><span class="num">5</span>Revival of Bharatanatyam in the 20th Century</h2>
+
+  <p><span class="tag fact">Fact</span><strong>Context.</strong> In the 1920s–40s, as the hereditary system was abolished, a parallel “revival” repositioned the dance as a respectable national art for the urban middle class — coinciding with nationalism's search for indigenous cultural symbols.</p>
+
+  <h3>Key figures</h3>
+  <ul>
+    <li><strong>E. Krishna Iyer</strong> (1897–1968) — <span class="tag fact">Fact</span> lawyer, Carnatic musician, and freedom-movement figure who publicly defended sadir against abolitionists, organized performances (via the Madras Music Academy, founded 1928), and is credited with promoting the name “Bharatanatyam.”</li>
+    <li><strong>Rukmini Devi Arundale</strong> (1904–1986) — <span class="tag fact">Fact</span> a Brahmin woman and Theosophist who learned from nattuvanar <strong>Pandanallur Meenakshisundaram Pillai</strong> and founded <strong>Kalakshetra</strong> (Chennai, <strong>1936</strong>), institutionalizing training. <span class="tag interp">Interpretation</span> celebrated for elevating the form's status and building an enduring institution — and criticized for “de-eroticizing” the repertoire and distancing the art from its devadasi originators.</li>
+    <li><strong>T. Balasaraswati</strong> (1918–1984) — <span class="tag fact">Fact</span> renowned performer from a hereditary devadasi/nattuvanar lineage (family of Veena Dhanammal); represented <strong>continuity</strong>, defended the <em>sringara</em> content of <em>padam</em> and <em>javali</em>, and resisted wholesale “purification.”</li>
+    <li><strong>The nattuvanars</strong> — <span class="tag fact">Fact</span> especially the <strong>Pandanallur</strong> lineage and descendants of the Tanjore Quartet — were the indispensable teachers who transmitted technique to the new generation. Later exponents include Mrinalini Sarabhai, Yamini Krishnamurthy, and many Kalakshetra graduates.</li>
+  </ul>
+  <div class="box interp"><span class="lbl">Interpretation</span>Balasaraswati and Rukmini Devi are often read as two poles of the revival: <strong>hereditary continuity</strong> vs. <strong>reformist reconstruction</strong>.</div>
+
+  <h3>Institutionalization &amp; changes in presentation</h3>
+  <p><span class="tag fact">Fact</span>Kalakshetra (1936), the Music Academy's programming, and later state bodies (Sangeet Natak Akademi, est. 1952) moved training from hereditary families to schools with formal syllabi, certification, and the public <em>arangetram</em> debut. The revival also altered:</p>
+  <ul>
+    <li><strong>Venue</strong> — temple/salon → proscenium stage and concert hall.</li>
+    <li><strong>Costume</strong> — the stitched “pyjama” costume, fan-pleat, and standardized temple jewelry (Kalakshetra style).</li>
+    <li><strong>Repertoire</strong> — shift toward devotional themes; some overtly erotic <em>javalis/padams</em> de-emphasized in reformist schools (retained in others); group choreography and dance-dramas introduced.</li>
+    <li><strong>Audience</strong> — ritual/patron communities → ticketed urban publics and the global diaspora.</li>
+  </ul>
+
+  <div class="notes"><div class="nh">✎ My points — §5 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s5" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== 6 ===== -->
+<section id="s6">
+  <h2 class="sec"><span class="num">6</span>The Role of Brahmins in Bharatanatyam</h2>
+  <p><em>One of the most sensitive topics; the competing positions are stated explicitly.</em></p>
+
+  <p><span class="tag fact">Fact</span><strong>Historical participation.</strong> The hereditary performers (devadasis) and many nattuvanars were <strong>not</strong> Brahmins; they belonged to specific non-Brahmin communities (often within the <em>Isai Vellalar</em> / <em>Melakkarar</em> musician communities). Brahmins were historically tied to temple priesthood and Sanskrit/Vedic learning, not to dance as a hereditary profession.</p>
+
+  <p><span class="tag fact">Fact</span><strong>Brahmin involvement in the revival.</strong> Several leading revival figures were Brahmins — notably <strong>Rukmini Devi Arundale</strong> and <strong>E. Krishna Iyer</strong> — and much of the new middle-class student body came from Brahmin and other upper-caste/upwardly-mobile communities.</p>
+
+  <div class="box interp"><span class="lbl">Interpretation — the “preservation” argument</span>Revivalists <strong>rescued an art under existential threat</strong>: with dedication abolished and the hereditary system collapsing, advocates gave the form legitimacy, institutions, documentation, and a future — broadening access beyond hereditary families.</div>
+
+  <div class="box contro"><span class="lbl">Controversy — the “appropriation” critique</span>A strong body of scholarship and activism argues the revival <strong>expropriated</strong> the art from the devadasi communities who created and preserved it; that those communities were stigmatized and excluded even as their repertoire was absorbed and “purified”; and that the reframing erased non-Brahmin authorship while crediting upper-caste reformers. The term <em>“Brahminization”</em> is used in this literature for the demographic shift and the “Sanskritized”/temple-devotional reframing (Soneji; echoed by Dalit/anti-caste commentators and hereditary-community descendants).</div>
+
+  <h3>Scholarly perspectives — both sides</h3>
+  <ul>
+    <li><strong>Value of revival:</strong> it is acknowledged across the literature that the revival created durable institutions and global reach, and that figures like Krishna Iyer genuinely defended the art when it was attacked.</li>
+    <li><strong>Appropriation critique:</strong> Soneji, Srinivasan, and Allen document the social dispossession of hereditary communities and the rewriting of the art's narrative.</li>
+    <li><strong>Synthesis (mainstream consensus):</strong> Matthew Harp Allen (“Rewriting the Script for South Indian Dance,” 1997) and Janet O'Shea treat the revival not as preservation <em>or</em> appropriation but as <strong>reconstruction/reinvention</strong> — simultaneous re-population (who dances), re-naming, re-ritualization, re-positioning (temple→stage), and re-storation. The modern art is genuinely rooted in the older tradition <em>and</em> substantially transformed, with real losses for the originating communities.</li>
+  </ul>
+  <div class="box fact"><span class="lbl">Neutral summary of the documented record</span>Originators were largely non-Brahmin hereditary communities; prominent revivalists included Brahmins; the practitioner base broadened to upper-caste urban groups; hereditary communities were marginalized in the same period. How to <em>evaluate</em> this sequence morally and culturally remains contested.</div>
+
+  <div class="notes"><div class="nh">✎ My points — §6 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s6" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== 7 ===== -->
+<section id="s7">
+  <h2 class="sec"><span class="num">7</span>Bharatanatyam &amp; Caste</h2>
+
+  <p><span class="tag fact">Fact</span><strong>Historical caste dynamics.</strong> The tradition was sustained by specific communities — devadasi women and nattuvanar/musician communities (often Isai Vellalar). Access was <strong>hereditary and caste-bound</strong>: largely closed to outsiders, while dedication was an expectation within those families.</p>
+
+  <p><span class="tag fact">Fact</span><strong>Shifts in access.</strong> 20th-century institutionalization <strong>opened formal training</strong> to anyone who could pay and attend a school — broadening access in principle, while in practice the new student base skewed toward upper-caste, economically comfortable urban families. <span class="tag interp">Interpretation</span>Access was thus simultaneously democratized (in principle) and re-stratified (in practice, along class/caste lines).</p>
+
+  <div class="box contro"><span class="lbl">Controversy — modern discussions</span>
+    <ul>
+      <li>Calls to <strong>credit and re-include hereditary communities</strong> and to teach the art's full social history.</li>
+      <li>Critiques that the field remains <strong>dominated by upper-caste practitioners</strong>, with barriers for Dalit and lower-caste dancers.</li>
+      <li>High-profile interventions by anti-caste artists — e.g. <strong>Nrithya Pillai</strong>, a dancer from a hereditary nattuvanar lineage, who publicly challenges the “Brahminical” narrative of the revival. These debates are active and unsettled.</li>
+    </ul>
+  </div>
+
+  <div class="notes"><div class="nh">✎ My points — §7 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s7" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== 8 ===== -->
+<section id="s8">
+  <h2 class="sec"><span class="num">8</span>Bharatanatyam &amp; Religion</h2>
+
+  <p><span class="tag fact">Fact</span><strong>Devotional content.</strong> Much of the repertoire is devotional, drawing on Hindu (especially Shaiva and Vaishnava bhakti) themes — Shiva (Nataraja), Vishnu/Krishna, Murugan, Devi — set to composers such as the Tanjore Quartet, Muthuswami Dikshitar, and Kshetrayya. The <em>margam</em> historically culminated in devotional address to the deity, and the temple was its original ritual setting.</p>
+
+  <div class="box contro"><span class="lbl">Controversy / Interpretation — is it inherently religious?</span>Three positions coexist:
+    <ol class="body">
+      <li><strong>Inherently devotional:</strong> a spiritual practice and offering (<em>bhakti</em>), inseparable from Hindu cosmology and temple ritual.</li>
+      <li><strong>An art using religious material:</strong> the technique, aesthetics, and theory form an artistic system; religious themes are <em>content</em> performable by anyone — much as Western classical music includes sacred works.</li>
+      <li><strong>Both, by context:</strong> the same item can be devotion for one dancer and aesthetic craft for another.</li>
+    </ol>
+  </div>
+
+  <p><span class="tag fact">Fact</span><strong>Practice across faiths today.</strong> Bharatanatyam is taught and performed by people of many faiths and none, including Muslim and Christian exponents, in secular concert settings worldwide. Some dancers create repertoire on non-Hindu or secular themes (Christian, Sufi, social-justice, environmental, abstract). <span class="tag contro">Controversy</span>Some religious-nationalist commentators contest such cross-faith or secular adaptations, while many dancers defend the form's openness — itself part of the religious-identity debate.</p>
+
+  <div class="notes"><div class="nh">✎ My points — §8 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s8" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== 9 ===== -->
+<section id="s9">
+  <h2 class="sec"><span class="num">9</span>Bharatanatyam as Culture</h2>
+
+  <div class="box contro"><span class="lbl">Controversy — the classification question</span>Bharatanatyam is variously claimed as:
+    <ul>
+      <li><strong>Tamil regional heritage</strong> — its language, lineages, temple base, and the Tanjore court are Tamil.</li>
+      <li><strong>Indian national heritage</strong> — its 20th-century elevation as a “national classical” art, <em>Natyashastra</em> roots, and global role as an emblem of “Indian culture.”</li>
+      <li><strong>Hindu religious practice</strong> — its devotional origin and content.</li>
+      <li><strong>A performing/secular art</strong> — its technique, theory, and global concert life.</li>
+    </ul>
+    These are not mutually exclusive; the disagreement is about <strong>emphasis and ownership</strong>, and it carries political weight — Tamil regionalists, Hindu cultural organizations, anti-caste activists, and cosmopolitan artists each foreground a different framing.
+  </div>
+
+  <h3>Viewpoints</h3>
+  <ul>
+    <li><em>Scholars</em> tend to describe it as a constructed “classical” tradition — historically real but modern in its present form (Allen, Meduri, O'Shea).</li>
+    <li><em>Many practitioners</em> experience it as a living devotional and artistic discipline.</li>
+    <li><em>Hereditary-community voices</em> foreground its specific caste-and-community origins.</li>
+  </ul>
+
+  <p><span class="tag fact">Fact</span><strong>Contemporary role.</strong> Today the form functions as a performing art; a marker of cultural identity (especially in the Tamil and Indian diaspora); a vehicle of childhood education and the <em>arangetram</em> rite of passage; and a medium for social and political commentary.</p>
+
+  <div class="notes"><div class="nh">✎ My points — §9 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s9" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== 10 ===== -->
+<section id="s10">
+  <h2 class="sec"><span class="num">10</span>Evolution of Bharatanatyam</h2>
+
+  <p><span class="tag fact">Fact</span><strong>Traditional vs. modern.</strong> “Traditional” usually denotes the <em>margam</em> and <em>abhinaya</em> transmitted through hereditary/nattuvanar lineages and the stylistic schools (<em>banis</em>) — Kalakshetra, Pandanallur, Vazhuvoor, Thanjavur. “Modern” denotes innovations in theme, staging, group choreography, lighting, recorded music, and cross-disciplinary collaboration.</p>
+
+  <p><span class="tag fact">Fact</span><strong>Globalization.</strong> Through migration and institutions, Bharatanatyam is now taught and performed across North America, the UK, Southeast Asia, Australia, the Gulf, and beyond; the diaspora <em>arangetram</em> is a major institution (Janet O'Shea, <em>At Home in the World</em>, 2007).</p>
+
+  <p><span class="tag fact">Fact</span><strong>Contemporary themes &amp; innovation.</strong> Choreographers address gender, caste, climate, mental health, mythological reinterpretation, abstraction, and inter-art fusion. Figures associated with innovation include <strong>Chandralekha</strong> (radical reworking of form and gender), <strong>Mallika Sarabhai</strong> (social/political themes), and many diaspora artists.</p>
+
+  <div class="box interp"><span class="lbl">Interpretation — challenges &amp; future</span>Commonly cited: balancing innovation with grammatical integrity; inclusion (caste, gender, male and LGBTQ+ dancers); commercialization of the arangetram “industry”; preserving live music and the nattuvanar role; and digital transmission. The form's vitality is not in doubt; its governance, ownership, and meaning are.</div>
+
+  <div class="notes"><div class="nh">✎ My points — §10 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s10" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== 11 ===== -->
+<section id="s11">
+  <h2 class="sec"><span class="num">11</span>Major Debates &amp; Controversies</h2>
+  <ol class="body">
+    <li><strong>Cultural ownership</strong> — Tamil regional vs. Indian national vs. community-specific (hereditary) claims; who has standing to define, reform, or innovate.</li>
+    <li><strong>Religious identity</strong> — Hindu devotional practice vs. secular/cross-faith art; tension when non-Hindu performers or secular themes appear, and when religious-nationalist actors assert exclusive Hindu ownership.</li>
+    <li><strong>Caste representation</strong> — the revival's role in marginalizing originating non-Brahmin/devadasi communities; the present upper-caste skew; demands for recognition and access.</li>
+    <li><strong>Authenticity vs. modernization</strong> — whether reform “purified” or “distorted” the art; whether innovation enriches or dilutes it; the status of the de-eroticized repertoire.</li>
+    <li><strong>Inclusion &amp; accessibility</strong> — class barriers (cost of training and arangetrams), gender (a historically female solo form and the place of male dancers), and broadening participation.</li>
+  </ol>
+  <div class="box contro"><span class="lbl">Controversy — note for debate</span>In each debate, credible scholars, practitioners, and community representatives hold opposing, sincerely argued positions. None is resolved by a single fact; they turn on values, emphasis, and contested historical interpretation.</div>
+
+  <div class="notes"><div class="nh">✎ My points — §11 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s11" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== 12 ===== -->
+<section id="s12">
+  <h2 class="sec"><span class="num">12</span>Conclusion</h2>
+
+  <div class="box fact"><span class="lbl">Where the evidence is firm — broad agreement</span>
+    <ul>
+      <li>Dance has deep roots in Tamil and pan-Indian culture; theory codified in the <em>Natyashastra</em>; Tamil performance attested from the Sangam era.</li>
+      <li>The modern <em>margam</em> was substantially shaped by the <strong>Tanjore Quartet in the early 19th century</strong>.</li>
+      <li>The art was preserved into the modern era principally by <strong>non-Brahmin devadasi communities and nattuvanars</strong>.</li>
+      <li>A <strong>colonial-era reform/abolition</strong> movement (Anti-Nautch; Madras Act, 1947) ended temple dedication.</li>
+      <li>A <strong>20th-century revival</strong> renamed, re-staged, institutionalized, and globalized the form, broadening its practitioner base.</li>
+      <li>The revival brought <strong>real gains</strong> (legitimacy, institutions, global reach) <em>and</em> <strong>real losses</strong> (dispossession of hereditary communities).</li>
+    </ul>
+  </div>
+
+  <div class="box contro"><span class="lbl">Where debate continues</span>
+    <ul>
+      <li>Whether the revival is best called <strong>preservation, appropriation, or reconstruction</strong> (consensus leans to “reconstruction,” but moral evaluation differs).</li>
+      <li>Whether the form is <strong>essentially religious, cultural, or artistic</strong>, and who <strong>owns</strong> it.</li>
+      <li>How to <strong>redress caste exclusion</strong> and re-include hereditary communities.</li>
+      <li>How far <strong>modernization</strong> can go while remaining “Bharatanatyam.”</li>
+    </ul>
+  </div>
+
+  <p><strong>Balanced closing statement.</strong> Bharatanatyam is simultaneously ancient and modern: a genuinely old performance culture whose present form was deliberately reconstructed in the 20th century. Honest scholarship credits the hereditary communities who created and preserved it, acknowledges the revivalists who institutionalized and globalized it, and recognizes that this same transformation marginalized the originators. The most defensible position is not to choose one narrative but to hold the documented facts together with their tensions intact.</p>
+
+  <div class="notes"><div class="nh">✎ My points — §12 <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="s12" data-ph="Add your own notes…"></div></div>
+</section>
+
+<!-- ===== APPENDIX ===== -->
+<section id="appendix">
+  <h2 class="sec"><span class="num">A</span>Appendices &amp; Sources</h2>
+
+  <h3>A — Concise Timeline</h3>
+  <table>
+    <tr><th>Period</th><th>Event</th></tr>
+    <tr><td>c. 200 BCE–200 CE</td><td><em>Natyashastra</em> of Bharata Muni (pan-Indian dramaturgy) — date approximate</td></tr>
+    <tr><td>c. 300 BCE–300 CE</td><td>Sangam-era Tamil dance/music culture; later <em>Cilappatikaram</em> references</td></tr>
+    <tr><td>c. 1010 CE</td><td>Brihadisvara temple (Thanjavur) consecrated; Chola inscriptions on temple women</td></tr>
+    <tr><td>Medieval</td><td><em>Abhinaya Darpana</em> (Nandikeshvara) — gesture vocabulary</td></tr>
+    <tr><td>Early 19th c.</td><td>Tanjore Quartet codify the <em>margam</em> under Maratha patronage (Serfoji II)</td></tr>
+    <tr><td>1890s</td><td>Anti-Nautch movement begins</td></tr>
+    <tr><td>1920s–30s</td><td>Reform legislation; Muthulakshmi Reddy's campaign</td></tr>
+    <tr><td>1928</td><td>Madras Music Academy founded (platform for revival)</td></tr>
+    <tr><td>1930s</td><td>E. Krishna Iyer's advocacy; “Bharatanatyam” name popularized</td></tr>
+    <tr><td>1936</td><td>Rukmini Devi Arundale founds Kalakshetra</td></tr>
+    <tr><td>1947</td><td>Madras Devadasis (Prevention of Dedication) Act</td></tr>
+    <tr><td>1952</td><td>Sangeet Natak Akademi established</td></tr>
+    <tr><td>Late 20th c.–present</td><td>Globalization, diaspora practice, innovation, caste/ownership debates</td></tr>
+  </table>
+
+  <h3>B — Key Figures</h3>
+  <ul>
+    <li><strong>Bharata Muni</strong> — attributed author, <em>Natyashastra</em>.</li>
+    <li><strong>Nandikeshvara</strong> — <em>Abhinaya Darpana</em>.</li>
+    <li><strong>Tanjore Quartet</strong> (Chinnayya, Ponnayya, Sivanandam, Vadivelu) — codifiers of the <em>margam</em>.</li>
+    <li><strong>Muthulakshmi Reddy</strong> — physician-legislator, abolition advocate.</li>
+    <li><strong>E. Krishna Iyer</strong> — revival advocate, renaming.</li>
+    <li><strong>Rukmini Devi Arundale</strong> — Kalakshetra founder, reformer.</li>
+    <li><strong>T. Balasaraswati</strong> — hereditary exponent, defender of <em>sringara</em> and continuity.</li>
+    <li><strong>Pandanallur Meenakshisundaram Pillai</strong> — leading nattuvanar/teacher.</li>
+    <li><strong>Chandralekha, Mallika Sarabhai, Nrithya Pillai</strong> — contemporary innovators and critical voices.</li>
+  </ul>
+
+  <h3>C — Suggested Scholarly Sources</h3>
+  <ul>
+    <li>Amrit Srinivasan, “Reform and Revival: The Devadasi and Her Dance,” <em>Economic and Political Weekly</em> (1985).</li>
+    <li>Matthew Harp Allen, “Rewriting the Script for South Indian Dance,” <em>TDR/The Drama Review</em> (1997).</li>
+    <li>Davesh Soneji, <em>Unfinished Gestures: Devadasis, Memory, and Modernity in South India</em> (2012).</li>
+    <li>Avanthi Meduri — dissertation and essays on Bharatanatyam's modern construction.</li>
+    <li>Janet O'Shea, <em>At Home in the World: Bharata Natyam on the Global Stage</em> (2007).</li>
+    <li>Saskia Kersenboom-Story, <em>Nityasumangali: Devadasi Tradition in South India</em> (1987).</li>
+    <li>Hari Krishnan, <em>Celluloid Classicism: Early Tamil Cinema and the Making of Modern Bharatanatyam</em> (2019).</li>
+    <li>Kapila Vatsyayan &amp; Sunil Kothari — documentary surveys of Indian classical dance.</li>
+  </ul>
+
+  <div class="notes"><div class="nh">✎ My points — Appendix / general <span class="saved">saved ✓</span></div><div class="area" contenteditable="true" data-key="appendix" data-ph="Add references, your own sources, or general notes…"></div></div>
+</section>
+
+<footer class="end">
+  <p><strong>About verification:</strong> claims tagged <span class="tag interp">Interpretation</span> or <span class="tag contro">Controversy</span> should be checked against the cited primary scholarship before academic use — datings (especially of the <em>Natyashastra</em> and <em>Cilappatikaram</em>) and evaluative conclusions remain subject to ongoing revision.</p>
+  <p>Prepared as a balanced research &amp; debate-preparation reference. Your notes are stored only in this browser (localStorage) — use <em>“Export my notes”</em> to save them as a file before sharing the document.</p>
+</footer>
+
+</div>
+</main>
+</div>
+
+<script>
+  // ---- Sidebar toggle (works at every width) ----
+  const NARROW = ()=>window.matchMedia('(max-width:880px)').matches;
+  function applyMode(){
+    // overlay (with backdrop) on narrow screens; pinned sidebar on wide
+    document.body.classList.toggle('show-backdrop', NARROW());
+  }
+  function setNav(open){
+    document.body.classList.toggle('nav-closed', !open);
+  }
+  applyMode();
+  setNav(!NARROW());                       // open by default on wide, closed on narrow
+  document.getElementById('navToggle').addEventListener('click', ()=>{
+    setNav(document.body.classList.contains('nav-closed'));
+  });
+  document.getElementById('backdrop').addEventListener('click', ()=> setNav(false));
+  // explicit, guaranteed navigation for every contents link
+  document.querySelectorAll('nav.toc a').forEach(a=>{
+    a.addEventListener('click', function(e){
+      var id = a.getAttribute('href');
+      var target = id && document.querySelector(id);
+      if(!target) return;                       // let browser handle anything unexpected
+      e.preventDefault();
+      if(NARROW()) setNav(false);               // close overlay first (it can shift layout)
+      // defer so the overlay-close layout change settles before we measure
+      setTimeout(function(){
+        // instant jump — reliable on this very tall document (smooth scroll can stall partway)
+        var y = target.getBoundingClientRect().top + window.scrollY - 12;
+        window.scrollTo({top:y, behavior:'auto'});
+        history.replaceState(null, '', id);
+        links.forEach(l=>l.classList.toggle('active', l.getAttribute('href')===id));
+      }, NARROW() ? 60 : 0);
+    });
+  });
+  window.addEventListener('resize', applyMode);
+
+  // ---- Editable notes: load + autosave to localStorage ----
+  const PREFIX = 'bharat_notes_';
+  document.querySelectorAll('.area').forEach(area=>{
+    const key = PREFIX + area.dataset.key;
+    const saved = localStorage.getItem(key);
+    if(saved !== null) area.innerHTML = saved;
+    let t;
+    const flag = area.closest('.notes').querySelector('.saved');
+    area.addEventListener('input', ()=>{
+      clearTimeout(t);
+      t = setTimeout(()=>{
+        localStorage.setItem(key, area.innerHTML);
+        flag.style.opacity = 1;
+        setTimeout(()=>flag.style.opacity = 0, 1200);
+      }, 400);
+    });
+  });
+
+  function exportNotes(){
+    let out = 'BHARATANATYAM — MY NOTES\n========================\n\n';
+    let any = false;
+    document.querySelectorAll('.area').forEach(area=>{
+      const txt = area.innerText.trim();
+      if(txt){
+        any = true;
+        const label = area.closest('.notes').querySelector('.nh').innerText.replace('✎ ','').replace(' saved ✓','').trim();
+        out += '['+label+']\n'+txt+'\n\n';
+      }
+    });
+    if(!any){ alert('No notes yet — type into a purple box first.'); return; }
+    const blob = new Blob([out], {type:'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bharatanatyam_my_notes.txt';
+    a.click();
+  }
+
+  function clearNotes(){
+    if(!confirm('Clear ALL your notes in this document? This cannot be undone.')) return;
+    document.querySelectorAll('.area').forEach(area=>{
+      area.innerHTML='';
+      localStorage.removeItem(PREFIX + area.dataset.key);
+    });
+  }
+
+  // ---- Scroll progress bar ----
+  const bar = document.getElementById('progress');
+  window.addEventListener('scroll', ()=>{
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (window.scrollY / h * 100) + '%';
+  });
+
+  // ---- Active TOC highlight ----
+  const links = [...document.querySelectorAll('nav.toc a')];
+  const secs = links.map(a=>document.querySelector(a.getAttribute('href')));
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const id = '#'+e.target.id;
+        links.forEach(l=>l.classList.toggle('active', l.getAttribute('href')===id));
+      }
+    });
+  }, {rootMargin:'-20% 0px -70% 0px'});
+  secs.forEach(s=>s && obs.observe(s));
+</script>
+</body>
+</html>
